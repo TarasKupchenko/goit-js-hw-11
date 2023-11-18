@@ -107,17 +107,15 @@ function createPhotoCard(image) {
   const card = document.createElement('div');
   card.classList.add('photo-card');
 
-  // Create an anchor element to wrap the image
+ 
   const anchor = document.createElement('a');
-  anchor.href = image.largeImageURL; // Set the larger image URL as the anchor's href
-  anchor.setAttribute('data-lightbox', 'gallery'); // Set data-lightbox attribute for SimpleLightbox
+  anchor.href = image.largeImageURL; 
+  anchor.setAttribute('data-lightbox', 'gallery'); 
 
   const img = document.createElement('img');
   img.src = image.webformatURL;
   img.alt = image.tags;
   img.loading = 'lazy';
-
-  // Append the image to the anchor
   anchor.appendChild(img);
 
   const info = document.createElement('div');
@@ -137,7 +135,7 @@ function createPhotoCard(image) {
     info.appendChild(p);
   });
 
-  card.appendChild(anchor); // Append the anchor to the card
+  card.appendChild(anchor);
   card.appendChild(info);
 
   return card;
