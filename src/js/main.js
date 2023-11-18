@@ -15,7 +15,8 @@ Notiflix.Notify.init({
 const gallery = document.getElementById('gallery');
 const form = document.getElementById('search-form');
 const loadMoreBtn = document.getElementById('load-more');
-let page = 1; // Початкова сторінка
+let page = 1;
+let totalHits = 0;
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -32,7 +33,7 @@ form.addEventListener('submit', async (event) => {
 
       loadMoreBtn.style.display = 'block';
     } catch (error) {
-      //console.error('Error during search:', error);
+      console.error('Error during search:', error);
       Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
     }
   }
@@ -45,6 +46,12 @@ loadMoreBtn.addEventListener('click', async () => {
   try {
     const { images } = await performSearch(searchQuery, page);
     displayImages(images);
+    if (totalHits > images.length) {
+      loadMoreBtn.style.display = 'block';
+    } else {
+      loadMoreBtn.style.display = 'none';
+      Notiflix.Notify.warning("We're sorry, but you've reached the end of search results.");
+    }
   } catch (error) {
     console.error('Error during "Load more":', error);
     Notiflix.Notify.failure('An error occurred while loading more images. Please try again.');
