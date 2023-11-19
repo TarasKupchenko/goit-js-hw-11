@@ -30,6 +30,10 @@ form.addEventListener('submit', async (event) => {
       const { images, currentTotalHits } = await performSearch(searchQuery, page);
       totalHits = currentTotalHits;
       displayImages(images);
+      Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+
+      // Оновлено: Перевірка на кінець колекції
+      const totalPages = Math.ceil(totalHits / images.per_page);
     } catch (error) {
       console.error('Error during search:', error);
       Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
