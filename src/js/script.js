@@ -20,22 +20,29 @@ let totalHits = 0;
 let perPage = 40;
 
 form.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  gallery.innerHTML = '';
-  page = 1;
-  const searchQuery = form.searchQuery.value.trim();
-  
-  if (searchQuery !== '') {
-    try {
-      const { images, currentTotalHits } = await performSearch(searchQuery, page);
-      totalHits = currentTotalHits;
-      displayImages(images);
-    } catch (error) {
-      console.error('Error during search:', error);
-      Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
-    }
-  }
-});
+   event.preventDefault();
+   gallery.innerHTML = '';
+   page = 1;
+   const searchQuery = form.searchQuery.value.trim();
+   
+   if (searchQuery !== '') {
+     try {
+       const { images, currentTotalHits } = await performSearch(searchQuery, page);
+       totalHits = currentTotalHits; // Оновлюємо totalHits
+       displayImages(images);
+ 
+       Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+ 
+       // Оновлено: Перевірка на кінець колекції
+       const totalPages = Math.ceil(totalHits / images.per_page);
+       loadMoreBtn.style.display = page < totalPages ? 'block' : 'none';
+     } catch (error) {
+       console.error('Error during search:', error);
+       Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+     }
+   }
+ });
+
 
 loadMoreBtn.addEventListener('click', async () => {
   page++;
