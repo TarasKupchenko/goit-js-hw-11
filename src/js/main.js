@@ -3,7 +3,7 @@ import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-Notiflix.Notify.init({
+Notiflix.Notify.Init({
   width: '300px',
   position: 'right-bottom',
   fontSize: '16px',
@@ -15,8 +15,8 @@ Notiflix.Notify.init({
 const gallery = document.getElementById('gallery');
 const form = document.getElementById('search-form');
 const loadMoreBtn = document.getElementById('load-more');
-let page = 1;
-let totalHits = 0;
+let page = 1; // Початкова сторінка
+let totalHits = 0; // Зберігаємо totalHits в області видимості модуля
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -26,12 +26,15 @@ form.addEventListener('submit', async (event) => {
   
   if (searchQuery !== '') {
     try {
-      const { images, totalHits } = await performSearch(searchQuery, page);
+      const { images, currentTotalHits } = await performSearch(searchQuery, page);
+      totalHits = currentTotalHits; // Оновлюємо totalHits
       displayImages(images);
 
       Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
 
-      loadMoreBtn.style.display = 'block';
+      // Оновлено: Перевірка на кінець колекції
+      const totalPages = Math.ceil(totalHits / images.per_page);
+      loadMoreBtn.style.display = page < totalPages ? 'block' : 'none';
     } catch (error) {
       console.error('Error during search:', error);
       Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
@@ -46,12 +49,10 @@ loadMoreBtn.addEventListener('click', async () => {
   try {
     const { images } = await performSearch(searchQuery, page);
     displayImages(images);
-    if (totalHits > images.length) {
-      loadMoreBtn.style.display = 'block';
-    } else {
-      loadMoreBtn.style.display = 'none';
-      Notiflix.Notify.warning("We're sorry, but you've reached the end of search results.");
-    }
+
+    // Оновлено: Перевірка на кінець колекції
+    const totalPages = Math.ceil(totalHits / images.per_page);
+    loadMoreBtn.style.display = page < totalPages ? 'none' : 'block';
   } catch (error) {
     console.error('Error during "Load more":', error);
     Notiflix.Notify.failure('An error occurred while loading more images. Please try again.');
@@ -75,10 +76,10 @@ async function performSearch(query, currentPage) {
       },
     });
 
-    const totalHits = response.data.totalHits || 0;
+    const currentTotalHits = response.data.totalHits || 0;
     const images = response.data.hits;
 
-    return { images, totalHits };
+    return { images, currentTotalHits };
   } catch (error) {
     throw error;
   }
@@ -91,30 +92,25 @@ function displayImages(images) {
   });
 
   // Перевірка на кінець колекції
-  const totalHits = images.totalHits || 0;
   const totalPages = Math.ceil(totalHits / images.per_page);
-  if (page >= totalPages) {
-    loadMoreBtn.style.display = 'none';
-    Notiflix.Notify.warning("We're sorry, but you've reached the end of search results.");
-  }
+  loadMoreBtn.style.display = page < totalPages ? 'block' : 'none';
 
   // Виклик методу refresh() бібліотеки SimpleLightbox
   const lightbox = new SimpleLightbox('.gallery a');
   lightbox.refresh();
 
-   // Плавне прокручування сторінки
-   const cardHeight = gallery.firstElementChild.getBoundingClientRect().height;
-   window.scrollBy({
-     top: cardHeight * 2,
-     behavior: 'smooth',
-   });
+  // Плавне прокручування сторінки
+  const cardHeight = gallery.firstElementChild.getBoundingClientRect().height;
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+  });
 }
 
 function createPhotoCard(image) {
   const card = document.createElement('div');
   card.classList.add('photo-card');
 
- 
   const anchor = document.createElement('a');
   anchor.href = image.largeImageURL; 
   anchor.setAttribute('data-lightbox', 'gallery'); 
@@ -147,3 +143,5 @@ function createPhotoCard(image) {
 
   return card;
 }
+
+
